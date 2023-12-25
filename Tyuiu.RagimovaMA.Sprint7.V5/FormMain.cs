@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Forms.DataVisualization.Charting;
 using System.IO;
 using Tyuiu.RagimovaMA.Sprint7.V5.Lib;
 
@@ -52,7 +53,7 @@ namespace Tyuiu.RagimovaMA.Sprint7.V5
                 dataGridViewMatrix_RMA.ColumnCount = columns;
 
                 //добавление данных
-                for (int i = 0; i < rows; i++)
+                for (int i = 1; i < rows; i++)
                 {
                     for (int j = 0; j < columns; j++)
                     {
@@ -120,16 +121,16 @@ namespace Tyuiu.RagimovaMA.Sprint7.V5
             string Articule_SAN = textBoxCodAdd_RMA.Text;
             string name_SAN = textBoxNameAdd_RMA.Text;
             string CountSklad_SAN = textBoxScladAdd_RMA.Text;
-            string postavshik_SAN = textBoxPostavAdd_RMA.Text;
-            string price_SAN = textBoxPriceAdd_RMA.Text;
+            string postavshik_SAN = textBoxPriceAdd_RMA.Text;
+            string price_SAN = textBoxPostavAdd_RMA.Text;
 
             // заполнение
             dataGridViewMatrix_RMA.Rows.Add(Articule_SAN, name_SAN, CountSklad_SAN, postavshik_SAN, price_SAN);
             textBoxCodAdd_RMA.Text = "";
             textBoxNameAdd_RMA.Text = "";
             textBoxScladAdd_RMA.Text = "";
-            textBoxPostavAdd_RMA.Text = "";
             textBoxPriceAdd_RMA.Text = "";
+            textBoxPostavAdd_RMA.Text = "";
             dataGridViewMatrix_RMA.CurrentCell = dataGridViewMatrix_RMA.Rows[dataGridViewMatrix_RMA.Rows.Count - 1].Cells[0];
         }
 
@@ -213,6 +214,122 @@ namespace Tyuiu.RagimovaMA.Sprint7.V5
         private void buttonDel_RMA_MouseLeave(object sender, EventArgs e)
         {
             this.Cursor = Cursors.Default;
+        }
+
+        private void buttonSearch_RMA_Click(object sender, EventArgs e)
+        {
+            string searchValue = textBoxSearch_RMA.Text;
+
+            foreach (DataGridViewRow row in dataGridViewMatrix_RMA.Rows)
+            {
+                bool found = false;
+                foreach(DataGridViewCell cell in row.Cells)
+                {
+                    if(cell.Value != null && cell.Value.ToString().Contains(searchValue))
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+                if(found)
+                {
+                    row.Selected = true;
+                    break;
+                }
+            }
+        }
+
+        private void buttonSum_RMA_Click(object sender, EventArgs e)
+        {
+            int sum = 0;
+            for (int i = 0; i < dataGridViewMatrix_RMA.Rows.Count; ++i)
+            {
+                sum += Convert.ToInt32(dataGridViewMatrix_RMA.Rows[i].Cells[2].Value);
+            }
+            textBoxSumSclad_RMA.Text = sum.ToString();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            int sum = 0;
+            for (int i = 0; i < dataGridViewMatrix_RMA.Rows.Count; ++i)
+            {
+                sum += Convert.ToInt32(dataGridViewMatrix_RMA.Rows[i].Cells[3].Value);
+            }
+            textBoxSumPrice_RMA.Text = sum.ToString();
+        }
+
+        private void buttonDone_RMA_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                int rows = dataGridViewMatrix_RMA.RowCount;
+                int columns = dataGridViewMatrix_RMA.ColumnCount;
+                string str;
+                string[,] matrix = new string[rows, columns];
+                for (int i = 0; i < rows; i++)
+                {
+                    for (int j = 0; j < columns; j++)
+                    {
+                        str = "";
+                        str += dataGridViewMatrix_RMA.Rows[i].Cells[j].Value;
+                        matrix[i, j] = str;
+                    }
+
+                }
+
+                int sump = 0;
+                int suma = 0;
+                int sumg = 0;
+                int sumc = 0;
+                for (int i = 0; i < rows - 1; i++)
+                {
+                    if (matrix[i, 1] == "Гирлянда")
+                    {
+                        sump += Convert.ToInt32(dataGridViewMatrix_RMA.Rows[i].Cells[2].Value);
+                    }
+                    if (matrix[i, 1] == "Скотч")
+                    {
+                        suma += Convert.ToInt32(dataGridViewMatrix_RMA.Rows[i].Cells[2].Value);
+                    }
+                    if (matrix[i, 1] == "Карандаши цветные")
+                    {
+                        sumg += Convert.ToInt32(dataGridViewMatrix_RMA.Rows[i].Cells[2].Value);
+                    }
+                    if (matrix[i, 1] == "Кружка")
+                    {
+                        sumc += Convert.ToInt32(dataGridViewMatrix_RMA.Rows[i].Cells[2].Value);
+                    }
+                }
+                textBoxPng_RMA.Text = sump.ToString();
+                textBoxApple_RMA.Text = suma.ToString();
+                textBoxGru_RMA.Text = sumg.ToString();
+                textBoxCup_RMA.Text = sumc.ToString();
+
+
+                string[] seriesArray = { "Гирлянда", "Скотч", "Карандаши цветные", "Кружка" };
+                int[] pointsArray = { sump, suma, sumg, sumc };
+
+                this.chart_RMA.Palette = ChartColorPalette.Fire;
+
+                this.chart_RMA.Titles.Add("Количество");
+
+                for (int i = 0; i < seriesArray.Length; i++)
+                {
+                    Series series = this.chart_RMA.Series.Add(seriesArray[i]);
+
+                    series.Points.Add(pointsArray[i]);
+                }
+            }
+            catch
+            {
+                MessageBox.Show("Невозможно повторно построить график", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void textBoxPriceAdd_RMA_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }
